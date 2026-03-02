@@ -97,7 +97,7 @@ class DatasetAnalyzer:
             print(f"Std per class: {split_df['num_images'].std():.0f}")
 
         train_df = df[df["split"] == "train"]
-        print(f"\PLANT SPECIES ({train_df['plant'].nunique()}):")
+        print(f"PLANT SPECIES ({train_df['plant'].nunique()}):")
         for plant in sorted(train_df["plant"].unique()):
             plant_df = train_df[train_df["plant"] == plant]
             n_diseases = len(plant_df[~plant_df["is_healthy"]])

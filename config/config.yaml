@@ -66,9 +66,10 @@ augmentation:
 dataloader:
   batch_size: 64
   num_workers: 2
-  persistent_workers: true
   pin_memory: true
   prefetch_factor: 2
+  persistent_workers: true
+  drop_last: true
 
 training:
   epochs: 20

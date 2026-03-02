@@ -90,6 +90,13 @@ def create_dataloaders(
     valid_dir = os.path.join(root_dir, ds_cfg.get("valid_dir", "valid"))
     test_dir = os.path.join(root_dir, ds_cfg.get("test_dir", "test"))
 
+    batch_size = dl_cfg.get("batch_size", 64)
+    num_workers = dl_cfg.get("num_workers", 2)
+    pin_memory = dl_cfg.get("pin_memory", True)
+    prefetch_factor = dl_cfg.get("prefetch_factor", 2)
+    persistent_workers = dl_cfg.get("persistent_workers", True) if num_workers > 0 else False
+    drop_last = dl_cfg.get("drop_last", True)
+
     train_dataset = PlantDiseaseDataset(train_dir, transform=train_transform)
     valid_dataset = PlantDiseaseDataset(valid_dir, transform=valid_transform)
 
@@ -103,22 +110,23 @@ def create_dataloaders(
     loaders = {
         "train": DataLoader(
             train_dataset,
-            batch_size=dl_cfg.get("batch_size", 32),
+            batch_size=batch_size,
             shuffle=train_shuffle,
             sampler=train_sampler,
-            num_workers=dl_cfg.get("num_workers", 4),
-            pin_memory=dl_cfg.get("pin_memory", True),
-            prefetch_factor=dl_cfg.get("prefetch_factor", 2),
-            persistent_workers=dl_cfg.get("persistent_workers", True) if dl_cfg.get("num_workers", 4) > 0 else False,
-            drop_last=True,
+            num_workers=num_workers,
+            pin_memory=pin_memory,
+            prefetch_factor=prefetch_factor if num_workers > 0 else None,
+            persistent_workers=persistent_workers,
+            drop_last=drop_last,
         ),
         "valid": DataLoader(
             valid_dataset,
-            batch_size=dl_cfg.get("batch_size", 32),
+            batch_size=batch_size,
             shuffle=False,
-            num_workers=dl_cfg.get("num_workers", 4),
-            pin_memory=dl_cfg.get("pin_memory", True),
-            persistent_workers=dl_cfg.get("persistent_workers", True) if dl_cfg.get("num_workers", 4) > 0 else False,
+            num_workers=num_workers,
+            pin_memory=pin_memory,
+            prefetch_factor=prefetch_factor if num_workers > 0 else None,
+            persistent_workers=persistent_workers,
         ),
     }
 
@@ -126,9 +134,10 @@ def create_dataloaders(
         test_dataset = PlantDiseaseDataset(test_dir, transform=valid_transform)
         loaders["test"] = DataLoader(
             test_dataset,
-            batch_size=1,
+            batch_size=batch_size,
             shuffle=False,
-            num_workers=0,
+            num_workers=num_workers,
+            pin_memory=pin_memory,
         )
 
     return loaders
